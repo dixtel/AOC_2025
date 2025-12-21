@@ -1,0 +1,22 @@
+(defparameter *answer* 0)
+(with-open-file
+  (in "./input1.txt"
+    :direction :input
+    :if-does-not-exist :error)
+  (do ((line (read-line in nil) (read-line in nil))
+        (i 0 (+ i 1))
+        (curr 50))
+    ((null line))
+    (let ((d (subseq line 0 1))
+      (r (parse-integer (subseq line 1 (length line)))))
+      (format t "line ~a, dir ~a, rotate ~a~%" i d r)
+      (if (equal d "R")
+        (setf curr (+ curr r))
+        (setf curr (- curr r))))
+      (do ()
+        ((and (>= curr 0) (<= curr 99)))
+        (cond ((> curr 99) (setf curr (- curr 100)))
+          ((< curr 0) (setf curr (+ curr 100)))))
+      (when (= curr 0) (defparameter *answer* (+ *answer* 1)))
+      (format t "curr: ~a~%" curr)))
+(format t "answer: ~a~%" *answer*)
