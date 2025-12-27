@@ -7,7 +7,7 @@
 
 (defun parse_bank (line)
   (do ((i 0 (+ i 1))
-       (bank (list))) ; ?
+       (bank (list)))
     ((>= i (length line)) (reverse bank))
     (push (parse-integer (subseq line i (+ i 1))) bank)))
 
@@ -29,8 +29,35 @@
       (when (> curr_joltage curr_max)
         (setf curr_max curr_joltage)))))
 
+(defun find_n_battery (from bank pack_size)
+  (do ((i from (+ i 1))
+       (curr_max -1)
+       (max_idx -1))
+    ((>= i (- (length bank) pack_size -1)) (values max_idx curr_max))
+    (let ((curr_joltage (elt bank i)))
+      (when (> curr_joltage curr_max)
+        (setf curr_max curr_joltage)
+        (setf max_idx i)))))
+
+(defun process_line_generic (line pack_size)
+  (let (bank second_joltage)
+    (setf bank (parse_bank line))
+    (do ((ps pack_size (decf ps))
+         (acc 0)
+         (prev_max_idx -1))
+        ((= ps 0) acc)
+        (multiple-value-bind (idx max_joltage) (find_n_battery (+ prev_max_idx 1) bank ps)
+          (incf acc (* (expt 10 (- ps 1)) max_joltage))
+          (setf prev_max_idx idx)))))
+
 (with-open-file (in "./input3.txt")
   (do ((line (read-line in nil) (read-line in nil))
        (acc 0))
-    ((null line) (print acc))
+    ((null line) (format t "part 1 answer ~a~%" acc))
     (incf acc (process_line line))))
+
+(with-open-file (in "./input3.txt")
+  (do ((line (read-line in nil) (read-line in nil))
+       (acc 0))
+    ((null line) (format t "part 2 answer ~a~%" acc))
+    (incf acc (process_line_generic line 12))))
