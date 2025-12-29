@@ -44,6 +44,9 @@
         (when (and (eql c #\@) (< (check_roll m x y) 4))
           (incf ar))))))
 
+(defun update_m (m x y v)
+  (setf (char (elt m y) x) v))
+
 (defun remove_available_rolls (m w h)
   (do ((y 0 (+ y 1))
        (ar 0))
@@ -53,14 +56,15 @@
       (let ((c (access m x y)))
         (when (and (eql c #\@) (< (check_roll m x y) 4))
           (incf ar)
-          (setf c #\.))))))
+          (update_m m x y #\.))))))
 
 (defun total_available_rolls (m w h)
   (do ((total 0) (removed_rolls -1))
     ((= removed_rolls 0) total)
-    (incf removed_rolls (remove_available_rolls m w h))
+    (setf removed_rolls (remove_available_rolls m w h))
     (incf total removed_rolls)))
 
 
 (multiple-value-bind (m w h) (initial_parse "./input4.txt")
-  (format t "part 1 answer: ~a~%" (available_rolls m w h)))
+  (format t "part 1 answer: ~a~%" (available_rolls m w h))
+  (format t "part 2 answer: ~a~%" (total_available_rolls m w h)))
